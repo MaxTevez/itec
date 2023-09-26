@@ -1,0 +1,123 @@
+use ats;
+-- update producto set precio = 90.55 where nombre = "redbull"; 
+-- delete from producto where idproducto = 6;
+-- insert into unionpp (idproducto,idproveedor)value 
+-- (9,3);
+/*
+select nombre,precio,fecha_venta,stock from producto where idcategoria!= 9 and stock <=100;
+update producto  set stock = 100 where idcategoria between 2 and 6;
+select * from producto where precio not between 70 and 100;
+select * from producto where nombre like '%r';
+*/
+select* from producto;
+select* from codigo_barra;
+select* from proveedores;
+select* from categoria;
+select* from unionpp;
+
+select p.nombre, p.precio, p.stock, c.nombre_cate as 'nombre de categoria' 
+from producto as p inner join categoria as c on p.idcategoria = c.idcategoria
+where p.stock <99;
+
+___________________________________________________________________
+"UNIR VARIAS TABLAS"
+___________________________________________________________________
+
+select p.nombre as 'Nombre del producto', p.stock as 'Cantidad disponible', cb.serial as 'Codigo de barra',
+c.nombre_cate as 'Categoria', pro.nombre_proveedor as 'Empresa proveedora'
+from producto as p inner join codigo_barra as cb on p.idproducto = cb.idproducto
+inner join categoria as c on p.idcategoria = c.idcategoria
+inner join unionpp as upp on upp.idproducto = p.idproducto
+inner join proveedores as pro  on upp.idproveedor = pro.idproveedores;
+
+
+___________________________________________________________________
+"CREAR Y LLAMAR PROCEDURE"
+___________________________________________________________________
+
+delimiter $$
+CREATE PROCEDURE productoxcategoria(IN id INT)
+begin
+	SELECT * FROM producto WHERE idcategoria=id;
+
+end$$
+
+delimiter ;
+
+call CALL productoxcategoria (9);
+
+___________________________________________________________________
+"CREAR TRIGGER"
+___________________________________________________________________
+
+delimiter |
+create trigger insertarTemp before  insert on categoria
+for each row 
+begin
+	insert into temporal (categoria) values (new.nombre_cate);
+
+end|
+
+___________________________________________________________________
+"CREAR TABLA"
+___________________________________________________________________
+CREATE TABLE `escuela`.`persona`(
+`idpersona` INT NOT NULL AUTO_INCREMENT,
+`nombre` VARCHAR(50) NOT NULL,
+`domicilio` VARCHAR(200) NULL,
+`celular` VARCHAR(10) NOT NULL,
+`correo_electronico` VARCHAR(50) NULL,
+`fecha_nacimiento` DATE NULL,
+`genero` VARCHAR(10)NOT NULL,
+PRIMARY KEY(`idpersona`));
+
+
+___________________________________________________________________
+"CREAR TABLA CON FOREIGN KEY "
+___________________________________________________________________
+
+CREATE TABLE `datospaises`.`estados`(
+`idestado` INT NOT NULL AUTO_INCREMENT,
+`nombreEstados`VARCHAR(45) NOT NULL,
+`idpais` INT NOT NULL,
+PRIMARY KEY (`idestado`),
+INDEX `id_pais_idx` (`idpais`ASC),
+CONSTRAINT `idpais`
+FOREIGN KEY (`idpais`)
+REFERENCES `datospaises`.`paises`(`idpais`)
+ON UPDATE NO ACTION
+ON DELETE NO ACTION);
+
+
+___________________________________________________________________
+"CREAR TABLA CON FOREIGN KEY "
+___________________________________________________________________
+
+
+CREATE TABLE `usuarios`.`tipo_usuario`(
+`id` INT NOT NULL AUTO_INCREMENT,
+`nombre` VARCHAR (45) NOT NULL,
+PRIMARY KEY (`id`));
+
+INSERT INTO tipo_usuario (nombre) values ("Administrador"),("Usuario");
+SELECT * FROM tipo_usuario;
+
+
+
+CREATE TABLE `usuarios`.`usuario`(
+`id` INT NOT NULL AUTO_INCREMENT,
+`nombreUsuario` VARCHAR (45) NOT NULL,
+`contraseña` VARCHAR (45) NOT NULL,
+`nombre` VARCHAR (45) NOT NULL,
+`correo` VARCHAR (45) NOT NULL,
+`ultima_sesion` DATETIME NULL DEFAULT '0000-00-00 00:00:00',
+`idTipo_usuario` INT NOT NULL,
+PRIMARY KEY (`id`),
+
+
+INDEX `idTipoUsuario_idx` (`idTipo_usuario` ASC),
+CONSTRAINT `idTipoUsuario`
+FOREIGN KEY (`idTipo_usuario`)
+REFERENCES `usuarios`.`tipo_usuario` (`id`)
+ON UPDATE NO ACTION
+ON DELETE NO ACTION);
